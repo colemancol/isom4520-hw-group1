@@ -4,13 +4,9 @@ import numpy as np
 from ._add_arima_forecasting import _add_arima_forecasting
 from ._add_garch_forecasting import _add_garch_forecasting
 
-def add_statistical_measures(
-        df,
-        macro_and_other_data = None,
-        interval = None,
-        **params):
-    
-    '''
+
+def add_statistical_measures(df, macro_and_other_data=None, interval=None, **params):
+    """
     ## GUIDE: Step 3
 
     Add statistical measures to the data
@@ -34,35 +30,39 @@ def add_statistical_measures(
 
         interval: str
             The interval of the data
-    
+
     Returns:
         df: pd.DataFrame
-    '''
+    """
 
-    ## TODO: ASSIGNMENT #2: Add Beta and IV here
+    ## TODO: ASSIGNMENT #2: Add Beta and Implied Volatility (IV) here
 
     # This flag will be used to check if we need to save the data to cache
     is_updated = False
     suffix = "" if interval is None else f"_{interval}"
     initial_length_of_columns = len(df.columns)
 
+    # FIXME: Why annualize for daily std?
     for t in [22]:
         if f"stat_Vola({t}){suffix}" not in df:
-            df[f"stat_Vola({t}){suffix}"] = df['Close'].shift().pct_change().rolling(window=t).std()*(252**0.5)
+            df[f"stat_Vola({t}){suffix}"] = df["Close"].shift().pct_change().rolling(
+                window=t
+            ).std() * (252**0.5)
 
     if macro_and_other_data is not None:
         # For adding the data related to the macro and market index
-        
+
         for k, data in macro_and_other_data.items():
-            if k in ['data', 'symbol', 'cache_dir']:
+            if k in ["data", "symbol", "cache_dir"]:
                 continue
-            
-            if f'stat_{k}_change(t_1)_ratio{suffix}' not in df:
-                df[f'stat_{k}_change(t_1)_ratio{suffix}'] = data['Close'].pct_change().shift()
+
+            if f"stat_{k}_change(t_1)_ratio{suffix}" not in df:
+                df[f"stat_{k}_change(t_1)_ratio{suffix}"] = (
+                    data["Close"].pct_change().shift()
+                )
 
     if len(df) == 0:
         return df.copy(), False
-
 
     df = _add_arima_forecasting(df, interval, **params)
     df = _add_garch_forecasting(df, interval, **params)
