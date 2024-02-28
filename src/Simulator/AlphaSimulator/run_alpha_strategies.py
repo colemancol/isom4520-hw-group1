@@ -11,6 +11,7 @@ from config import LONG, SHORT
 from src.Simulator.AlphaSimulator.SimulatorUtils.TradeHistoryHolder import (
     TradeHistoryHolder,
 )
+from src.Simulator.DataProviders.AllStocksPrices import AllStocksPrices
 
 from .SimulatorUtils import close_trade_for_stop_loss
 from .SimulatorUtils import close_trade_for_take_profit
@@ -24,7 +25,9 @@ from src.TradingTools import set_stop_loss_and_take_profit_thresholds
 simulation_logger = logging.getLogger("simulation_logger")
 
 
-def run_alpha_strategies(stock_histories, trade_history_holder, **params):
+def run_alpha_strategies(
+    stock_histories: AllStocksPrices, trade_history_holder: TradeHistoryHolder, **params
+):
 
     ## GUIDE: Step 5
 
@@ -508,7 +511,7 @@ def run_alpha_strategy_for_one_symbol(macro_and_other_data, params):
     return list(holder)
 
 
-def market_and_df_interator(stock_histories, **params):
+def market_and_df_interator(stock_histories: AllStocksPrices, **params):
 
     for symbol in stock_histories.data:
         yield stock_histories.get(symbol)

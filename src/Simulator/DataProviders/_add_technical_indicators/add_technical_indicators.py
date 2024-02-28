@@ -1,9 +1,9 @@
 import pandas as pd
 import pandas_ta as ta
 
-def add_technical_indicators(df, interval = None, **params):
 
-    '''
+def add_technical_indicators(df, interval=None, **params) -> tuple[pd.DataFrame, bool]:
+    """
     ## GUIDE: Step 4
 
     This function adds technical indicators to the data.
@@ -23,13 +23,13 @@ def add_technical_indicators(df, interval = None, **params):
 
     Returns:
         df: pd.DataFrame
-    
-    '''
+
+    """
 
     ## TODO: ASSIGNMENT #3: Add some technical indicators here
 
     technical_indicators = {
-        'ATR': 14,
+        "ATR": 14,
     }
 
     suffix = "" if interval is None else f"_{interval}"
@@ -38,11 +38,11 @@ def add_technical_indicators(df, interval = None, **params):
 
     for indicator, period in technical_indicators.items():
 
-        if indicator == 'ATR':
-            if f'stat_ATR{suffix}' in df.columns:
+        if indicator == "ATR":
+            if f"stat_ATR{suffix}" in df.columns:
                 continue
-            atr = ta.atr(df['High'], df['Low'], df['Close'], length=period)
-            df[f'stat_ATR{suffix}'] = atr.shift()
+            atr = ta.atr(df["High"], df["Low"], df["Close"], length=period)
+            df[f"stat_ATR{suffix}"] = atr.shift()
 
     """
     PerformanceWarning: DataFrame is highly fragmented. 

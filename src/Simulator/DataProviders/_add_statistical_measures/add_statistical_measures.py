@@ -5,7 +5,9 @@ from ._add_arima_forecasting import _add_arima_forecasting
 from ._add_garch_forecasting import _add_garch_forecasting
 
 
-def add_statistical_measures(df, macro_and_other_data=None, interval=None, **params):
+def add_statistical_measures(
+    df, macro_and_other_data=None, interval=None, **params
+) -> tuple[pd.DataFrame, bool]:
     """
     ## GUIDE: Step 3
 
