@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 
-from ...config import ENUMS
+from config import ENUMS
 
 
 class Logger(object):
