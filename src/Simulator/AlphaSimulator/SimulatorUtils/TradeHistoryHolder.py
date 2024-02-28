@@ -67,9 +67,7 @@ class TradeHistoryHolder:
         self.history.sort(key=lambda x: (x.opening_time))
 
     def convert_to_dict(self):
-        history_dict = None
-        if history_dict is None:
-            history_dict = {}
+        history_dict = dict[str, list[Trade]]()
         for trade in self.history:
 
             if history_dict.get(trade.symbol) is None:
