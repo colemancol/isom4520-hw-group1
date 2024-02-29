@@ -6,6 +6,7 @@ import logging
 import multiprocessing as mp
 from multiprocessing import Process, Manager
 from collections import deque
+from typing import Optional
 
 from config import LONG, SHORT
 from src.Simulator.AlphaSimulator.SimulatorUtils.TradeHistoryHolder import (
@@ -302,7 +303,8 @@ def run_alpha_strategy_for_one_symbol(macro_and_other_data, params):
         ]
     ].copy()
 
-    # The iteration over the signals
+    # The iteration over data with signal = 1
+    # note both dict_of_signals & dict_of_prices have dates as keys
     for t in dict_of_signals:
 
         """
@@ -328,6 +330,8 @@ def run_alpha_strategy_for_one_symbol(macro_and_other_data, params):
         exact_opening_time = t
 
         # Open a trade if no trade is open on the symbol
+        trade: Optional[Trade] = None
+        stop_loss_threshold, take_profit_threshold = 0.0, 0.0
         if (
             not any_trade_open
             and (signal == LONG or signal == SHORT)
@@ -376,7 +380,7 @@ def run_alpha_strategy_for_one_symbol(macro_and_other_data, params):
 
         while True:
             # When the trade is closed, there's no need to iterate until end
-            if trade.is_closed or (trade is None or not any_trade_open):
+            if (trade is None or not any_trade_open) or trade.is_closed:
                 break
 
             # Getting the next event, please refer to the _get_next_event
@@ -518,7 +522,12 @@ def market_and_df_interator(stock_histories: AllStocksPrices, **params):
 
 
 def _get_next_event(
-    df_in, t_monitoring, trade, stop_loss_threshold, take_profit_threshold, **params
+    df_in: pd.DataFrame,
+    t_monitoring: pd.Timestamp,
+    trade: Trade,
+    stop_loss_threshold: float,
+    take_profit_threshold: float,
+    **params,
 ):
     """
     ## GUIDE: Step 7

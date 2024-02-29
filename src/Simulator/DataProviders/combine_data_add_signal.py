@@ -8,7 +8,7 @@ from src.Simulator.Signals import get_alpha_signal_func
 from src.Simulator.Signals import get_universe_signal_func
 
 
-def combine_data_add_signal(macro_and_other_data, **params):
+def combine_data_add_signal(macro_and_other_data, **params) -> pd.DataFrame:
     """
     Combine the data and add the signal
 
@@ -45,7 +45,9 @@ def combine_data_add_signal(macro_and_other_data, **params):
             continue
         df[col] = df[col].ffill()
 
-    if get_universe_signal_func(**params) is None:
+    if (
+        get_universe_signal_func(**params) is None
+    ):  # if the alpha strategy name is not present in the registered universal signal functions
         alpha_signal_func = get_alpha_signal_func(**params)
         df = alpha_signal_func(df, **params)
 
