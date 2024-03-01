@@ -577,7 +577,7 @@ def _get_next_event(
     not_same_candle_open_at_open = df.index != trade.exact_opening_time
 
     # SL at Open
-    if params["should_stop_loss"]:
+    if should_stop_loss:
         filtered_df_for_sl_at_open = df[
             (
                 (trade.trade_direction * (df["Open"] - stop_loss_threshold) < 0)
