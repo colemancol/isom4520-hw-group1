@@ -1,6 +1,6 @@
 def get_params(
     years_to_consider=5,
-    n_symbols=20,
+    n_symbols=50,
     market="US",
     slippage_rate=0.00025,
     # Strategy params

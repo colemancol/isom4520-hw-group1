@@ -9,13 +9,15 @@ import matplotlib.pyplot as plt
 import pandas_ta as ta
 
 from statsmodels.tsa.arima.model import ARIMA
-from arch import arch_model
+
+# from arch import arch_model
 
 from src.Simulator.DataProviders import AllStocksPrices
 
+
 def analyze_raw_data(timeframe, **params):
-    
-    market = params['market']
+
+    market = params["market"]
 
     base_direc = os.path.join("reports", f"{market}", f"RawDataReport-{timeframe}")
     if not os.path.exists(base_direc):
@@ -29,49 +31,52 @@ def analyze_raw_data(timeframe, **params):
     _get_basic_statistics(data, base_direc, **params)
     _plot_heatmap(data, base_direc, **params)
 
-    print ("analyze_raw_data done")
+    print("analyze_raw_data done")
 
 
 def _check_params_get_data(timeframe, stock_histories, **params):
 
     data = stock_histories.data_local
-        
+
     for symbol in list(data.keys()):
         data[symbol] = data.pop(symbol)
 
     return data
 
 
-
 def _get_basic_statistics(data, base_direc, **params):
 
     holder = {}
     for symbol, df in data.items():
-        
+
         res = {}
 
-        df['returns'] = df['Close'] / df['Open'] - 1
-        res['returns_CoV'] = df['returns'].std() / df['returns'].mean()
+        df["returns"] = df["Close"] / df["Open"] - 1
+        res["returns_CoV"] = df["returns"].std() / df["returns"].mean()
 
-        res['returns_autocorr'] = (df['Close'] / df['Open'] - 1).autocorr()
+        res["returns_autocorr"] = (df["Close"] / df["Open"] - 1).autocorr()
 
-        res['total(%)'] = (df['Close'].iloc[-1] / df['Close'].iloc[0] - 1) * 100
+        res["total(%)"] = (df["Close"].iloc[-1] / df["Close"].iloc[0] - 1) * 100
 
-        res['O/L_mean'] = (df['Open'] / df['Low'] - 1).mean() * 100
-        res['O/L_CoV'] = ((df['Open'] / df['Low'] - 1) * 100).std() / res['O/L_mean']
+        res["O/L_mean"] = (df["Open"] / df["Low"] - 1).mean() * 100
+        res["O/L_CoV"] = ((df["Open"] / df["Low"] - 1) * 100).std() / res["O/L_mean"]
 
-        res['H/L_mean'] = (df['High'] / df['Low'] - 1).mean() * 100
-        res['H/L_CoV'] = ((df['High'] / df['Low'] - 1) * 100).std() / res['H/L_mean']
+        res["H/L_mean"] = (df["High"] / df["Low"] - 1).mean() * 100
+        res["H/L_CoV"] = ((df["High"] / df["Low"] - 1) * 100).std() / res["H/L_mean"]
 
-        res['O/C_abs_mean'] = (df['Open'] / df['Close'] - 1).abs().mean() * 100
-        res['O/C_abs_CoV'] = ((df['Open'] / df['Close'] - 1) * 100).abs().std() / res['O/C_abs_mean']
+        res["O/C_abs_mean"] = (df["Open"] / df["Close"] - 1).abs().mean() * 100
+        res["O/C_abs_CoV"] = ((df["Open"] / df["Close"] - 1) * 100).abs().std() / res[
+            "O/C_abs_mean"
+        ]
 
-        res['O_to_C_t_1_mean'] = (df['Open'] / df['Close'].shift() - 1).mean() * 100
-        res['O_to_C_t_1_CoV'] = ((df['Open'] / df['Close'].shift() - 1) * 100).std() / res['O_to_C_t_1_mean']
+        res["O_to_C_t_1_mean"] = (df["Open"] / df["Close"].shift() - 1).mean() * 100
+        res["O_to_C_t_1_CoV"] = (
+            (df["Open"] / df["Close"].shift() - 1) * 100
+        ).std() / res["O_to_C_t_1_mean"]
 
         holder[symbol] = res
 
-        df.drop(columns = ['returns'], inplace=True)
+        df.drop(columns=["returns"], inplace=True)
 
     df = pd.DataFrame(holder).T
 
@@ -81,13 +86,12 @@ def _get_basic_statistics(data, base_direc, **params):
     df.to_csv(os.path.join(base_direc, "BasicStatistics.csv"))
 
 
-
 def _plot_heatmap(data, base_direc, **params):
 
     # Plot for the close prices
     holder = []
     for symbol, df in data.items():
-        holder.append(df['Close'])
+        holder.append(df["Close"])
 
     df = pd.concat(holder, axis=1)
     df.columns = data.keys()
@@ -104,7 +108,7 @@ def _plot_heatmap(data, base_direc, **params):
     # Plot for daolu returns
     holder = []
     for symbol, df in data.items():
-        holder.append(df['Close'] / df['Open'] - 1)
+        holder.append(df["Close"] / df["Open"] - 1)
 
     df = pd.concat(holder, axis=1)
     df.columns = data.keys()
