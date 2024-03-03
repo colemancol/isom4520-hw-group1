@@ -8,6 +8,8 @@ from .ReportingUtils import get_statistical_summary_of_trades
 from .ReportingUtils import plot_the_budget_vs_time
 from .ReportingUtils import draw_trades_executions
 from .ReportingUtils import plot_duration_of_net_exposure
+from .ReportingUtils import plot_histogram
+from .ReportingUtils import plot_qq
 
 from src.TradingTools import get_net_exposure
 
@@ -93,9 +95,10 @@ def generate_report_for_trades_history(
     if should_log:
         draw_trades_executions(stock_histories, **params)
         plot_duration_of_net_exposure(df_g, **params)
-
+        plot_histogram(df_g, **params)
+        plot_qq(df_g, **params)
         ## TODO: ASSIGNMENT #1
-    
+
     return summaries_df
 
 def _generate_report_for_symbols(df, TRADE_REPORTS_DIR, **params):
