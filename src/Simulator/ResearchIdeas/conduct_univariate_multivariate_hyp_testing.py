@@ -15,14 +15,15 @@ from .reseach_utils import clean_nans
 from .reseach_utils import convert_categorical_to_binary
 
 import logging
+
 logger = logging.getLogger("research_logger")
 
 P_VALUE_THRESHOLD = 0.1
 TEST_SIZE = 0.4
 
-def conduct_univariate_multivariate_hyp_testing(df, **params):
 
-    '''
+def conduct_univariate_multivariate_hyp_testing(df, **params):
+    """
     ## GUIDE: Step 12
 
     This is an example of how we can use the univariate
@@ -36,67 +37,86 @@ def conduct_univariate_multivariate_hyp_testing(df, **params):
 
     Returns:
         None
-    '''
+    """
 
-    # df = df.copy()
-    # df.dropna(inplace=True, axis=0)
     # Split into train and test
     df_train, df_test = train_test_split(df, test_size=TEST_SIZE, random_state=42)
 
-    short_trades = df_train[df_train['trade_direction'] == SHORT]
-    long_trades = df_train[df_train['trade_direction'] == LONG]
-
+    # separate df into long and short trades
+    short_trades = df_train[df_train["trade_direction"] == SHORT]
+    long_trades = df_train[df_train["trade_direction"] == LONG]
 
     # Univariate Hypothesis Testing on the long ones
-    holder = {}
+    long_holder = {}
     for col in long_trades.columns:
 
         if not col.startswith("stat_"):
             continue
 
-        df_tmp = long_trades[[col, 'PnL_ratio']].copy()
+        df_tmp = long_trades[[col, "PnL_ratio"]].copy()
         df_tmp.dropna(inplace=True, axis=0)
 
         X = df_tmp[col]
-        Y = df_tmp['PnL_ratio']
+        Y = df_tmp["PnL_ratio"]
         X = sm.add_constant(X)
 
         model = sm.OLS(Y, X).fit()
         p_value = model.pvalues[col]
-        holder[col] = p_value
+        long_holder[col] = p_value
 
-    print ("Long Trades")
-    pprint.pprint (holder)
+    print("Long Trades")
+    pprint.pprint(long_holder)
 
     # Univariate Hypothesis Testing on the short ones
-    holder = {}
+    short_holder = {}
     for col in short_trades.columns:
 
         if not col.startswith("stat_"):
             continue
 
-        df_tmp = short_trades[[col, 'PnL_ratio']].copy()
+        df_tmp = short_trades[[col, "PnL_ratio"]].copy()
         df_tmp.dropna(inplace=True, axis=0)
 
         X = df_tmp[col]
-        Y = df_tmp['PnL_ratio']
+        Y = df_tmp["PnL_ratio"]
         X = sm.add_constant(X)
 
         model = sm.OLS(Y, X).fit()
         p_value = model.pvalues[col]
-        holder[col] = p_value
+        short_holder[col] = p_value
 
-    print ("Short Trades")
-    pprint.pprint (holder)
+    print("Short Trades")
+    pprint.pprint(short_holder)
 
-    # Regress PnL vs stat_Vola(22)_1d
-    df_tmp = short_trades[['stat_Vola(22)_1d', 'PnL_ratio']].copy()
-    df_tmp.dropna(inplace=True, axis=0)
-    X = df_tmp['stat_Vola(22)_1d']
-    Y = df_tmp['PnL_ratio']
+    # conduct multivariate hypothesis testing on significant stat measures from univariate hypothesis testing
+    # find signicant stat measures first (top 5 smallest p-value since all p-values are > 0.05)
+    long_stats = sorted(long_holder, key=lambda x: long_holder.get(x, 1))[:5]
+    short_stats = sorted(short_holder, key=lambda x: short_holder.get(x, 1))[:5]
+
+    # multivariate hypothesis testing: long trades
+    print(
+        f"Multivariate Hypothesis Testing: Long Trades\n\t\u27a4 Variables used: {long_stats}"
+    )
+    long_trades_multi_ht = long_trades[[*long_stats, "PnL_ratio"]].dropna(axis=0)
+    X = long_trades_multi_ht[long_stats]
+    Y = long_trades_multi_ht["PnL_ratio"]
     X = sm.add_constant(X)
 
     model = sm.OLS(Y, X).fit()
-    print (model.summary())
+    print(model.summary())
+
+    print("\n-----\n")
+
+    # multivariate hypothesis testing: short trades
+    print(
+        f"Multivariate Hypothesis Testing: Short Trades\n\t\u27a4 Variables used: {short_stats}"
+    )
+    short_trades_multi_ht = short_trades[[*short_stats, "PnL_ratio"]].dropna(axis=0)
+    X = short_trades_multi_ht[short_stats]
+    Y = short_trades_multi_ht["PnL_ratio"]
+    X = sm.add_constant(X)
+
+    model = sm.OLS(Y, X).fit()
+    print(model.summary())
 
     return
