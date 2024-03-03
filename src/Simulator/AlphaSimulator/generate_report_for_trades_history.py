@@ -95,7 +95,7 @@ def generate_report_for_trades_history(
         plot_duration_of_net_exposure(df_g, **params)
 
         ## TODO: ASSIGNMENT #1
-
+    
     return summaries_df
 
 def _generate_report_for_symbols(df, TRADE_REPORTS_DIR, **params):
