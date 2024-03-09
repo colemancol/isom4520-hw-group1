@@ -68,8 +68,8 @@ def add_statistical_measures(
     ## TODO: ASSIGNMENT #2: Add Beta and IV here
     col = "stat_Beta"
     if col not in df:
-        market_return = df["stat_market_index_change(t_1)_ratio_1d"]
-        stock_return = df["Close"].pct_change().shift(1)
+        market_return = df["stat_market_index_change(t_1)_ratio_1d"].rolling(window = 22)
+        stock_return = df["Close"].shift(1).pct_change().rolling(window = 22)
         var_market = market_return.var()
         covariance = market_return.cov(stock_return)
         beta = covariance / var_market
@@ -77,8 +77,8 @@ def add_statistical_measures(
 
     col = "stat_iv"
     if col not in df:
-        market_return = df["stat_market_index_change(t_1)_ratio_1d"]
-        stock_return = df["Close"].pct_change().shift(1)
+        market_return = df["stat_market_index_change(t_1)_ratio_1d"].rolling(window = 22)
+        stock_return = df["Close"].shift(1).pct_change().rolling(window = 22)
         beta = df["stat_Beta"]
         non_systematic_risk = (
             stock_return.var() - beta**2 * market_return.var()

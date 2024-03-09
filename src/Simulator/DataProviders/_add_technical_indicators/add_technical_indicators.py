@@ -30,6 +30,8 @@ def add_technical_indicators(df, interval = None, **params):
 
     technical_indicators = {
         'ATR': 14,
+        'SMA': 14,
+        'MACD': (12, 26, 9)
     }
 
     suffix = "" if interval is None else f"_{interval}"
@@ -44,6 +46,20 @@ def add_technical_indicators(df, interval = None, **params):
             atr = ta.atr(df['High'], df['Low'], df['Close'], length=period)
             df[f'stat_ATR{suffix}'] = atr.shift()
 
+        if indicator == 'SMA':
+            if f'stat_SMA{suffix}' in df.columns:
+                continue
+            sma = ta.sma(df['Close'], length=period)
+            df[f'stat_SMA{suffix}'] = sma.shift() 
+        
+        if indicator == 'MACD':
+            if f'stat_MACD{suffix}' in df.columns:
+                continue
+            macd = ta.macd(df['Close'], fast=period[0], slow=period[1], signal=period[2])
+            df[f'stat_MACD_12_26_9'] = macd['MACD_12_26_9'].shift()
+            df[f'stat_MACDs_12_26_9'] = macd['MACDs_12_26_9'].shift()
+            df[f'stat_MACDh_12_26_9'] = macd['MACDh_12_26_9'].shift()
+                 
     """
     PerformanceWarning: DataFrame is highly fragmented. 
     This is usually the result of calling `frame.insert` many times,
