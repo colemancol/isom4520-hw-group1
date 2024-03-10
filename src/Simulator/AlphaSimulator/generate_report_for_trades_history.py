@@ -17,18 +17,15 @@ simulation_logger = logging.getLogger("simulation_logger")
 
 
 def generate_report_for_trades_history(
-        trades_df,
-        daily_budget_dfs,
-        stock_histories,
-        **params):
-    
-    '''
+    trades_df, daily_budget_dfs, stock_histories, **params
+):
+    """
     ## GUIDE: Step 9
 
     Generate the report for the trades history
 
     This function generates the report for the trades history.
-    
+
 
     Args:
         trades_df: pd.DataFrame
@@ -45,15 +42,16 @@ def generate_report_for_trades_history(
 
     Returns:
         summaries_df: pd.DataFrame
-    '''
+    """
 
-    
-    enums = params['enums']
+    enums = params["enums"]
     # Converting to datetime
     df = trades_df
     df_g = daily_budget_dfs
 
-    df_g['net_exposure'] = get_net_exposure(df_g['long_positions_values'], df_g['short_positions_values'])
+    df_g["net_exposure"] = get_net_exposure(
+        df_g["long_positions_values"], df_g["short_positions_values"]
+    )
 
     should_log = params.get("should_log")
 
@@ -69,13 +67,13 @@ def generate_report_for_trades_history(
 
         try:
             df_g = pd.merge(
-                df_g, stock_histories.market_index['Close'],
-                left_index=True, right_index=True, how='left'
-                )
-            df_g.rename(
-                columns = {'Close': 'MarketIndexClose'},
-                inplace = True
-                )
+                df_g,
+                stock_histories.market_index["Close"],
+                left_index=True,
+                right_index=True,
+                how="left",
+            )
+            df_g.rename(columns={"Close": "MarketIndexClose"}, inplace=True)
         except Exception as e:
             pass
 
@@ -85,12 +83,15 @@ def generate_report_for_trades_history(
     summaries_df = get_statistical_summary_of_trades(trades_df, df_g, **params)
 
     if should_log:
-        summaries_df.to_csv("reports/Summary.csv")
+        market, strategy_name = params["market"], params["strategy_name"]
+        summaries_df.to_csv(
+            f"reports/{market}/{strategy_name}/Summary_{strategy_name}.csv"
+        )
         simulation_logger.info(
-            "\n----------------------------------------------------------\n" + \
-            summaries_df.to_string() + \
             "\n----------------------------------------------------------\n"
-            )
+            + summaries_df.to_string()
+            + "\n----------------------------------------------------------\n"
+        )
 
     if should_log:
         draw_trades_executions(stock_histories, **params)
@@ -101,28 +102,31 @@ def generate_report_for_trades_history(
 
     return summaries_df
 
+
 def _generate_report_for_symbols(df, TRADE_REPORTS_DIR, **params):
 
     holder = []
-    for symbol in set(df['symbol'].values):
+    for symbol in set(df["symbol"].values):
 
-        df_tmp = df[df['symbol'] == symbol]
+        df_tmp = df[df["symbol"] == symbol]
 
-        df_tmp_long = df_tmp[df_tmp['trade_direction'] == LONG]
-        df_tmp_short = df_tmp[df_tmp['trade_direction'] == SHORT]
-        holder.append({
+        df_tmp_long = df_tmp[df_tmp["trade_direction"] == LONG]
+        df_tmp_short = df_tmp[df_tmp["trade_direction"] == SHORT]
+        holder.append(
+            {
                 "Symbol": symbol,
                 "Count": len(df_tmp),
                 "Count_Long": len(df_tmp_long),
                 "Count_Short": len(df_tmp_short),
-                "win": df_tmp['is_successful'].mean(),
-                "win_long": df_tmp_long['is_successful'].mean(),
-                "win_short": df_tmp_short['is_successful'].mean(),
-                "PnL_ratio_mean": df_tmp['PnL_ratio'].mean(),
-                "PnL_ratio_long_mean": df_tmp_long['PnL_ratio'].mean(),
-                "PnL_ratio_short_mean": df_tmp_short['PnL_ratio'].mean(),
-            })
-        
+                "win": df_tmp["is_successful"].mean(),
+                "win_long": df_tmp_long["is_successful"].mean(),
+                "win_short": df_tmp_short["is_successful"].mean(),
+                "PnL_ratio_mean": df_tmp["PnL_ratio"].mean(),
+                "PnL_ratio_long_mean": df_tmp_long["PnL_ratio"].mean(),
+                "PnL_ratio_short_mean": df_tmp_short["PnL_ratio"].mean(),
+            }
+        )
+
     df_to_save = pd.DataFrame(holder)
     df_to_save.to_csv(os.path.join(TRADE_REPORTS_DIR, "SummaryOfExecutedTradesIn.csv"))
 
