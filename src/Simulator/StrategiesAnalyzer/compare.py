@@ -6,9 +6,6 @@ import statsmodels.api as sm
 def compare(**params):
     base_dir = os.path.join("reports", params["market"])
     strategies_to_compare = params["strategy_names_to_compare"]
-    df_strategy_summary = pd.DataFrame(
-        columns=["annual_return(%)", "sharpe_ratio", "max_drawdown"]
-    )
     df_strategy_roi = pd.DataFrame(columns=strategies_to_compare)
     for strategy in strategies_to_compare:
         strategy_executed_trades_path = os.path.join(
@@ -38,3 +35,6 @@ def compare(**params):
 
     # find correlation between monthly roi of the strategies
     correlation_matrix = df_strategy_roi.corr()
+    print("----- Correlation Matrix ----")
+    print(correlation_matrix)
+    metrics = ["annual(%)", "sharpe_ratio"]
