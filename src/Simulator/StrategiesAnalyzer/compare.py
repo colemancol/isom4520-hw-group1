@@ -1,6 +1,10 @@
 import os
 import pandas as pd
 import statsmodels.api as sm
+import numpy as np
+
+from .utils import calculate_portoflio_returns, calculate_portoflio_volatility
+from ._optimize_weightings import optimize_weightings
 
 
 def compare(**params):
@@ -8,10 +12,11 @@ def compare(**params):
 
     # for finding correlation
     strategies_to_compare = params["strategy_names_to_compare"]
+    if len(strategies_to_compare) > 2:
+        raise NotImplementedError("Currently only supports comparing 2 strategies")
     df_strategy_roi = pd.DataFrame(columns=strategies_to_compare)
 
     # for finding best weights
-    metrics = ["annual(%)", "annual_volatility", "sharpe_ratio"]
     metrics_data = list[dict]()
     for strategy in strategies_to_compare:
         strategy_executed_trades_path = os.path.join(
@@ -32,7 +37,6 @@ def compare(**params):
             df_strategy_summary = pd.read_csv(strategy_summary_path, index_col=0).iloc[
                 0
             ]
-            print(df_strategy_summary)
             metrics_data.append(
                 {
                     "strategy": strategy,
@@ -58,11 +62,41 @@ def compare(**params):
 
     # find correlation between monthly roi of the strategies
     correlation_matrix = df_strategy_roi.corr()
-    print("----- Correlation Matrix ----")
+    print("\n----- Correlation Matrix ----")
     print(correlation_matrix)
-    print("----------")
+    print("----------", end="\n\n")
 
     # find best weights to maximize sharpe ratio
     df_metrics = pd.DataFrame.from_dict(metrics_data)  # type: ignore
     df_metrics.set_index("strategy", inplace=True)
-    print(df_metrics)
+    returns = np.array(df_metrics["annual_return"], dtype=np.float32) / 100
+    volatilities = np.array(df_metrics["annual_volatility"], dtype=np.float32)
+    print(f"Returns: {returns}")
+    print(f"Volatilities: {volatilities}")
+
+    # initialize equal weights
+    weights = np.ones(len(strategies_to_compare)) / len(strategies_to_compare)
+
+    print("\n===== Before optimising weights (equal weights) =====")
+    portfolio_return = calculate_portoflio_returns(returns, weights)
+    portfolio_volatility = calculate_portoflio_volatility(
+        volatilities, weights, correlation_matrix
+    )
+    print(f"\u27a4 Portfolio return: {portfolio_return}")
+    print(f"\u27a4 Portfolio volatility: {portfolio_volatility}")
+    print(f"\u27a4 Sharpe ratio: {portfolio_return / portfolio_volatility}")
+    print("==========")
+    print()
+    print("===== After optimising weights =====")
+    best_sharpe, best_weights = optimize_weightings(
+        returns, volatilities, correlation_matrix
+    )
+    best_portfolio_return = calculate_portoflio_returns(returns, best_weights)
+    best_portfolio_volatility = calculate_portoflio_volatility(
+        volatilities, best_weights, correlation_matrix
+    )
+    print(f"\u27a4 Best weights: {best_weights}")
+    print(f"\u27a4 Portfolio return: {best_portfolio_return}")
+    print(f"\u27a4 Portfolio volatility: {best_portfolio_volatility}")
+    print(f"\u27a4 Sharpe ratio: {best_sharpe}")
+    print("==========")

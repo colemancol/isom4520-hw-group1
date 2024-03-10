@@ -5,7 +5,7 @@ def get_params(
     slippage_rate=0.00025,
     # Strategy params
     strategy_name="ema",  # random, buy_and_hold, atr, macd, ema
-    strategy_names_to_compare=["macd", "atr", "ema"],
+    strategy_names_to_compare=["macd", "atr"],
     # STOP LOSS
     stop_loss_percentage=3,
     risk_level_percentage=0.5,
