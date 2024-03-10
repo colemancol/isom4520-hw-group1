@@ -5,6 +5,7 @@ def get_params(
     slippage_rate=0.00025,
     # Strategy params
     strategy_name="macd",  # random, buy_and_hold
+    strategy_names_to_compare=["macd", "atr"],
     # STOP LOSS
     stop_loss_percentage=3,
     risk_level_percentage=0.5,
@@ -95,6 +96,7 @@ def get_params(
         "market": market,
         "slippage_rate": slippage_rate,
         "strategy_name": strategy_name,
+        "strategy_names_to_compare": strategy_names_to_compare,
         "strategy_type": "market_neutral",
         "risk_level_percentage": risk_level_percentage,
         "should_stop_loss": should_stop_loss,

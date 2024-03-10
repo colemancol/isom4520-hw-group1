@@ -95,7 +95,7 @@ def conduct_univariate_multivariate_hyp_testing(df, **params):
 
     # multivariate hypothesis testing: long trades
     print(
-        f"Multivariate Hypothesis Testing: Long Trades\n\t\u27a4 Variables used: {long_stats}"
+        f"Multivariate Hypothesis Testing: Long Trades\n\u27a4 Variables used: {long_stats}"
     )
     long_trades_multi_ht = long_trades[[*long_stats, "PnL_ratio"]].dropna(axis=0)
     X = long_trades_multi_ht[long_stats]
