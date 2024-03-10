@@ -4,7 +4,7 @@ def get_params(
     market="US",
     slippage_rate=0.00025,
     # Strategy params
-    strategy_name="atr",  # random, buy_and_hold
+    strategy_name="macd",  # random, buy_and_hold
     # STOP LOSS
     stop_loss_percentage=3,
     risk_level_percentage=0.5,

@@ -1,12 +1,11 @@
 import pandas as pd
-import pandas_ta as ta
 
 
 def add_atr_strategy(df_in: pd.DataFrame, **params):
     df = df_in.copy()
     df["trade_opening_price"] = df["Open"]
-
     df["atr"] = df_in["stat_ATR_1d"]
+
     df["close_above_1_atr"] = df["Close"] + df["atr"]
     df["close_above_1_atr"] = df["close_above_1_atr"].shift()
     df["close_below_1_atr"] = df["Close"] - df["atr"]
