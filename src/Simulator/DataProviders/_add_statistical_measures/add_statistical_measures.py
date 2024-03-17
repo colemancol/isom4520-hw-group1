@@ -1,14 +1,17 @@
 import pandas as pd
 import numpy as np
+import statsmodels.api as sm
 
 from ._add_arima_forecasting import _add_arima_forecasting
 from ._add_garch_forecasting import _add_garch_forecasting
 
-
 def add_statistical_measures(
-    df: pd.DataFrame, macro_and_other_data=None, interval=None, **params
-):
-    """
+        df,
+        macro_and_other_data = None,
+        interval = None,
+        **params):
+    
+    '''
     ## GUIDE: Step 3
 
     Add statistical measures to the data
@@ -32,10 +35,13 @@ def add_statistical_measures(
 
         interval: str
             The interval of the data
-
+    
     Returns:
         df: pd.DataFrame
-    """
+    '''
+
+    ## TODO: ASSIGNMENT #2: Add Beta and IV here
+
     # This flag will be used to check if we need to save the data to cache
     is_updated = False
     suffix = "" if interval is None else f"_{interval}"
@@ -43,51 +49,62 @@ def add_statistical_measures(
 
     for t in [22]:
         if f"stat_Vola({t}){suffix}" not in df:
-            df[f"stat_Vola({t}){suffix}"] = df["Close"].shift().pct_change().rolling(
-                window=t
-            ).std() * (252**0.5)
+            df[f"stat_Vola({t}){suffix}"] = df['Close'].shift().pct_change().rolling(window=t).std()*(252**0.5)
 
     if macro_and_other_data is not None:
         # For adding the data related to the macro and market index
-
+        
         for k, data in macro_and_other_data.items():
-            if k in ["data", "symbol", "cache_dir"]:
+            if k in ['data', 'symbol', 'cache_dir']:
                 continue
+            
+            if f'stat_{k}_change(t_1)_ratio{suffix}' not in df:
+                df[f'stat_{k}_change(t_1)_ratio{suffix}'] = data['Close'].pct_change().shift()
 
-            if f"stat_{k}_change(t_1)_ratio{suffix}" not in df:
-                df[f"stat_{k}_change(t_1)_ratio{suffix}"] = (
-                    data["Close"].pct_change().shift()
+            if "stat_50d_std_over_50_sma" not in df:
+                df['stat_50d_std_over_50_sma'] = (
+                df["Close"].rolling(window=50).std() / df["Close"].rolling(window=50).mean()
                 )
 
-    col = "stat_50d_std_over_50_sma"  # has to start with stat
-    if col not in df:
-        df[col] = (
-            df["Close"].rolling(window=50).std() / df["Close"].rolling(window=50).mean()
-        )
+        for w in [22, 66]:
+            if macro_and_other_data.get('market_index') is None:
+                continue
 
-    ## TODO: ASSIGNMENT #2: Add Beta and IV here
-    col = "stat_Beta"
-    if col not in df:
-        market_return = df["stat_market_index_change(t_1)_ratio_1d"].rolling(window = 22)
-        stock_return = df["Close"].shift(1).pct_change().rolling(window = 22)
-        var_market = market_return.var()
-        covariance = market_return.cov(stock_return)
-        beta = covariance / var_market
-        df[col] = beta
+            try:
+                if f'stat_beta_{w}{suffix}' not in df:
+                    merged_df = pd.merge(df['Close'], macro_and_other_data['market_index']['Close'], left_index=True, right_index=True, suffixes=('', '_market'))
+                    merged_df['Close_return'] = merged_df['Close'].pct_change()
+                    merged_df['Close_market_return'] = merged_df['Close_market'].pct_change()
+                    merged_df = merged_df.dropna()
 
-    col = "stat_iv"
-    if col not in df:
-        market_return = df["stat_market_index_change(t_1)_ratio_1d"].rolling(window = 22)
-        stock_return = df["Close"].shift(1).pct_change().rolling(window = 22)
-        beta = df["stat_Beta"]
-        non_systematic_risk = (
-            stock_return.var() - beta**2 * market_return.var()
-        )  # Overall risk = systematic risk + non-systematic risk (in terms of variance, assuming no correlation between SR & NSR)
-        iv = non_systematic_risk**0.5
-        df[col] = iv
+                    betas = [np.nan for i in range(w-1)]
+                    idio_vols = [np.nan for i in range(w-1)]
+                    for i in range(len(merged_df) - w + 1):
+                        window_data = merged_df.iloc[i:i+w]
+                        beta, idio_vol = calculate_beta(window_data['Close_return'], window_data['Close_market_return'])
+                        betas.append(beta)
+                        idio_vols.append(idio_vol)
+
+
+                    betas = pd.Series(betas, index=merged_df.index)
+                    betas = betas.shift()
+                    betas.name = f'stat_beta_{w}{suffix}'
+
+                    idio_vols = pd.Series(idio_vols, index=merged_df.index)
+                    idio_vols = idio_vols.shift()
+                    idio_vols.name = f"stat_IV_based_on_daily_return_market_{w}{suffix}"
+
+                    # merge beta with df
+                    df = df.join(betas)
+                    df = df.join(idio_vols)
+
+            except Exception as e:
+                df[f'stat_beta_{w}{suffix}'] = np.nan
+                df[f"stat_IV_based_on_daily_return_market_{w}{suffix}"] = np.nan
 
     if len(df) == 0:
         return df.copy(), False
+
 
     df = _add_arima_forecasting(df, interval, **params)
     df = _add_garch_forecasting(df, interval, **params)
@@ -107,3 +124,23 @@ def add_statistical_measures(
         is_updated = True
 
     return df.copy(), is_updated
+
+
+def calculate_beta(stock_returns, market_returns):
+    # Calculate covariance and variance of returns
+    # covariance = np.cov(stock_returns, market_returns)[0, 1]
+    # market_variance = np.var(market_returns)
+
+    # # Calculate beta
+    # beta = covariance / market_variance
+
+    # Regress stock_returns on market_returns using statsmodels
+    model = sm.OLS(stock_returns, sm.add_constant(market_returns))
+    results = model.fit()
+
+    # Extract the beta
+    beta = results.params.values[1]
+
+    idio_vol = np.std(results.resid)
+
+    return beta, idio_vol
