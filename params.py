@@ -1,34 +1,46 @@
+
 def get_params(
-    years_to_consider=5,
-    n_symbols=5,
-    market="US",
-    slippage_rate=0.00025,
-    # Strategy params
-    strategy_name="ema",  # random, buy_and_hold, atr, macd, ema
-    strategy_names_to_compare=["macd", "atr"],
-    # STOP LOSS
-    stop_loss_percentage=3,
-    risk_level_percentage=0.5,
-    should_stop_loss=True,
-    # TAKE PROFIT
-    take_profit_percentage=3,
-    should_take_profit=True,
-    # Intraday trading params
-    should_close_at_end_of_candle=False,
-    should_close_at_signal=False,
-    # run_alpha_params
-    should_limit_one_position_in_run_alpha=True,
-    run_parallel=False,
-    # Reporting params
-    reporting_period="Year",
-    n_executed_trade_for_plotting=1,
-    # Data pre-processing params
-    should_add_garch=False,
-    should_add_arima_forecasting=False,
-    should_load_from_cache=True,
-    draw_stat_figures=True,
-):
-    """
+        years_to_consider = 5,
+        n_symbols = 5,
+        market = "US",
+        slippage_rate = 0.00025,
+
+        # Strategy params
+        strategy_name = "random", # random, buy_and_hold
+
+        # STOP LOSS
+        stop_loss_percentage = 3,
+        risk_level_percentage = 0.5,
+        should_stop_loss = True,
+
+        # TAKE PROFIT
+        take_profit_percentage = 3,
+        should_take_profit = True,
+
+        # Intraday trading params
+        should_close_at_end_of_candle = False,
+        should_close_at_signal = False,
+        
+        # run_alpha_params
+        should_limit_one_position_in_run_alpha = True,
+        run_parallel = False,
+        
+        # Reporting params
+        reporting_period = "Year",
+        n_executed_trade_for_plotting = 1,
+
+        # Data pre-processing params
+        should_add_garch = False,
+        should_add_arima_forecasting = False,
+
+        should_load_from_cache = True,
+
+        draw_stat_figures = True,
+
+        should_log = True,
+    ):
+
+    '''
     Params:
 
     years_to_consider: int
@@ -87,7 +99,7 @@ def get_params(
 
     Returns:
         dict
-    """
+    '''
 
     return {
         "trading_interval": "1d",
@@ -95,24 +107,31 @@ def get_params(
         "n_symbols": n_symbols,
         "market": market,
         "slippage_rate": slippage_rate,
+
         "strategy_name": strategy_name,
-        "strategy_names_to_compare": strategy_names_to_compare,
         "strategy_type": "market_neutral",
+
         "risk_level_percentage": risk_level_percentage,
         "should_stop_loss": should_stop_loss,
         "stop_loss_percentage": stop_loss_percentage,
+
         "should_take_profit": should_take_profit,
         "take_profit_percentage": take_profit_percentage,
+
         "should_close_at_end_of_candle": should_close_at_end_of_candle,
         "should_close_at_signal": should_close_at_signal,
+        
         "should_load_from_cache": should_load_from_cache,
         "should_limit_one_position_in_run_alpha": should_limit_one_position_in_run_alpha,
         "reporting_period": reporting_period,
         "run_parallel": run_parallel,
         "n_executed_trade_for_plotting": n_executed_trade_for_plotting,
+
         "should_add_garch": should_add_garch,
         "should_add_arima_forecasting": should_add_arima_forecasting,
+
         "take_profit_strategy": "Simple",
-        "should_log": True,
+        "should_log": should_log,
+
         "draw_stat_figures": draw_stat_figures,
     }

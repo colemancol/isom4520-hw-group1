@@ -6,8 +6,11 @@ def add_MA5_crosses_MA50_signal(df_in, **params):
     # df['signal'] = np.random.choice([0, 1, -1], len(df), p=[0.4, 0.3, 0.3])
     # df['trade_opening_price'] = df['Open'] * (1+ df['signal'] * slippage_rate)
 
-    df['ma_50'] = df['Close'].rolling(window=50).mean()
-    df['ma_5'] = df['Close'].rolling(window=200).mean()
+    small_period = params ['small_period']
+    large_period = params ['large_period']
+
+    df['ma_50'] = df['Close'].rolling(window=large_period).mean()
+    df['ma_5'] = df['Close'].rolling(window=small_period).mean()
 
     # The moment the ma_5 crosses the ma_50 from below, we buy
     # The moment the ma_5 crosses the ma_50 from above, we sell

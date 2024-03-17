@@ -12,9 +12,13 @@ def optimize(**params):
         "stop_loss_percentage": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "risk_level_percentage": [0.1, 0.2, 0.3, 0.4, 0.5],
         "should_stop_loss": [True, False],
+        "strategy_name": ["MA5_cross_MA50"],
 
         "take_profit_percentage": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         "should_take_profit": [True, False],
+
+        "small_period" : [5, 10, 15, 20, 25, 30],
+        "large_period" : [50, 100, 150, 200, 250, 300],
     }
 
     opt_method = params.get("opt_method", "grid_search")
@@ -72,6 +76,10 @@ def _optimize_using_grid_search(trading_params_ranges, params):
 
         print (f"Grid search iteration {i+1}/{len(combinations)} in {time.time() - start:.2f} seconds")
         start = time.time()
+
+    # Find the best combination based on the highest annual %
+    best_combination = max(opt_result_holder, key=lambda x: x[1].get("annual(%)"))
+    print(best_combination)
 
     return opt_result_holder
 
