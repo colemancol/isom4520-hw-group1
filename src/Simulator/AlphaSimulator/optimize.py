@@ -182,7 +182,10 @@ def _optimize_using_genetic_algorithm(trading_params_ranges, params):
             fitness_scores.append(score)
 
         best_individual = population_results[np.argmax(fitness_scores)]
-        print(f"Best individual in generation {generation+1}: {best_individual}")
+        from pprint import pprint
+        print(f"Best individual in generation {generation+1}:")
+        pprint(best_individual[0])
+        pprint(best_individual[1])
 
         # Select the best individuals for the next generation
         offspring = elitism_selection(population, fitness_scores, n_elites)
