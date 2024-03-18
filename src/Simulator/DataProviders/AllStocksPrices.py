@@ -84,8 +84,8 @@ class AllStocksPrices:
         
         # Get all the symbols for the market
         # TODO: manually substitute symbols (list[str]) with given portfolio in MT
-        # symbols = get_all_symbols(**self.__dict__)
-        symbols = ["AAPL", "TSLA", "CAT", "COIN", "NVDA"]
+        symbols = get_all_symbols(**self.__dict__)
+        #symbols = ["AAPL", "TSLA", "CAT", "COIN", "NVDA"]
         # -------------------------------------------------------------------- #
         #                      YAHOO FINANCE DATA PROVIDER                     #
         # -------------------------------------------------------------------- #
