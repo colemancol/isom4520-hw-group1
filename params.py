@@ -6,7 +6,7 @@ def get_params(
         slippage_rate = 0.00025,
 
         # Strategy params
-        strategy_name = "random", # random, buy_and_hold
+        strategy_name = "macd", # random, buy_and_hold
 
         # STOP LOSS
         stop_loss_percentage = 3,
@@ -30,7 +30,7 @@ def get_params(
         n_executed_trade_for_plotting = 1,
 
         # Data pre-processing params
-        should_add_garch = False,
+        should_add_garch = True,
         should_add_arima_forecasting = False,
 
         should_load_from_cache = True,

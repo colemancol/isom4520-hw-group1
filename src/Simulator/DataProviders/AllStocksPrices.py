@@ -83,8 +83,9 @@ class AllStocksPrices:
             }
         
         # Get all the symbols for the market
-        symbols = get_all_symbols(**self.__dict__)
-        
+        # TODO: manually substitute symbols (list[str]) with given portfolio in MT
+        # symbols = get_all_symbols(**self.__dict__)
+        symbols = ["AAPL", "TSLA", "CAT", "COIN", "NVDA"]
         # -------------------------------------------------------------------- #
         #                      YAHOO FINANCE DATA PROVIDER                     #
         # -------------------------------------------------------------------- #
@@ -104,7 +105,7 @@ class AllStocksPrices:
 
             for symbol, df_1d in self.data.items():
 
-                df_1d, is_updated1 = add_statistical_measures(df_1d, macro_and_other_data=macro_and_other_data, interval = "1d", **params_to_pass)
+                df_1d, is_updated1 = add_statistical_measures(df_1d, macro_and_other_data=macro_and_other_data, interval = "1d", symbol=symbol, **params_to_pass)
                 df_1d, is_updated2 = add_technical_indicators(df_1d, macro_and_other_data=macro_and_other_data, interval = "1d", **params_to_pass)
                 self.data[symbol] = df_1d
                 

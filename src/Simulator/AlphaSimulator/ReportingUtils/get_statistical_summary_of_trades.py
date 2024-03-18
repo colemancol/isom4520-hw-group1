@@ -113,13 +113,14 @@ def add_statistical_reports(df, summary, df_g=None, is_chunk=False, **params):
             ) * 100
 
         ## TODO: ASSIGNMENT #1
-        df_g["log_return"] = np.log(
+        df_g.loc[:, "log_return"] = np.log(
             df_g["PortfolioValue"] / df_g["PortfolioValue"].shift(1)
         )
         mu = df_g["log_return"].mean()
         sigma = df_g.log_return.std()
         summary["annual_volatility"] = sigma * (252**0.5)
-        summary["sharpe_ratio"] = (mu / sigma) * (252**0.5)
+        with np.errstate(divide='ignore',invalid='ignore'):
+            summary["sharpe_ratio"] = (mu / sigma) * (252**0.5)
         summary["skewness"] = df_g["log_return"].skew()
         summary["kurtosis"] = df_g["log_return"].kurt()
 
